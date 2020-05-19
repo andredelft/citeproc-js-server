@@ -51,7 +51,8 @@ if __name__ == "__main__":
     parser.add_argument('--changed', nargs='?', metavar="N", type=int, default=0, help='convert files that have been modified within the last <N> seconds')
 
     args = parser.parse_args()
-    
+    print(args)
+
     w = jsonwalker()
     mode = os.stat(args.source).st_mode
     if S_ISDIR(mode):
@@ -92,6 +93,16 @@ if __name__ == "__main__":
             doc = w.makedoc(open(fullname).read())
             obj = w.walktojson(doc)
             open(newname, 'w').write(json.dumps(obj,indent=2))
+        
+        # Update config/default.json endpoints
+        with open(os.path.join('config', 'default.json')) as f:
+            config = json.load(f)
+            if sourceDir == './csl':
+                config['cslPath'] = destDir
+            elif sourceDir == './csl-locales':
+                config['localesPath'] = destDir
+        with open(os.path.join('config', 'default.json'), 'w') as f:
+            json.dump(config, f, indent = 4)
     elif singleFile:
         if sourceFile[-4:] != '.csl':
             print("Unexpected file extension")
